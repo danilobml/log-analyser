@@ -1,3 +1,3 @@
-# Lög Analyser 
+# Log-Analyser 
 
 ## Work in Progress...
