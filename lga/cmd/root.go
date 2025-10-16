@@ -27,7 +27,16 @@ and extract useful insights from raw logs with ease.`,
 		
 		filePath := args[0]
 
-		err := analyser.AnalyseFileLogs(filePath)
+		options := analyser.Options{}
+		pathsOption, err := cmd.Flags().GetBool("paths")
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		// TODO: Add options from and to
+
+		options.Paths = pathsOption
+
+		err = analyser.AnalyseFileLogs(filePath, options)
 		if err != nil {
 			fmt.Println(err.Error())
 		}
@@ -49,6 +58,9 @@ func init() {
 	// will be global for your application.
 
 	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.log-analyser.yaml)")
+
+	rootCmd.PersistentFlags().Bool("paths", false, "Analysis per path")
+	// TODO: Add flags for from and to
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
