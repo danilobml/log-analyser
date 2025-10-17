@@ -64,10 +64,15 @@ Gin:
 ```
 .
 ├─ cmd/
-│  └─ lga/          # main package
+│  └─ root.go     # main package
 ├─ internal/
-│  └─ analyser/     # parsing & analysis logic
+│  └─ analyser/   # analysis logic
+│  └─ parser/     # parsing logic
+│  └─ models/     # log definition
+│  └─ dtos/       # response structs
+│  └─ helpers/    # helper functions
 ├─ go.mod
+├─ Makefile       # Make commands
 └─ README.md
 ```
 
