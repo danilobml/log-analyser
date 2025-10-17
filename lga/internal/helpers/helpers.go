@@ -8,6 +8,24 @@ import (
 	"github.com/danilobml/lga/lga/internal/dtos"
 )
 
+func PrintHeaders(from, to time.Time) {
+	fmt.Println("**RESULTS:**")
+
+	if from.IsZero() {
+		fmt.Print("Start Date: not set - ")
+	} else {
+		fmt.Printf("Start Date: %s - ", from.Format("2006-01-02"))
+	}
+
+	if to.IsZero() {
+		fmt.Printf("End Date: %s\n", time.Now().Format("2006-01-02"))
+	} else {
+		fmt.Printf("End Date: %s\n", to.Format("2006-01-02"))
+	}
+
+	fmt.Println()
+}
+
 func PrintStatusAnalysisResults(statusAnalysis *dtos.StatusAnalysisResponse, path string) {
 	message := fmt.Sprintf("Total logs: %d, Total errors: %d, 4xx Errors: %d, 5xx Errors: %d\n", statusAnalysis.TotalLogs, statusAnalysis.ErrorsTotal, statusAnalysis.Errors400, statusAnalysis.Errors500)
 
@@ -37,4 +55,8 @@ func ParseDateTime(s string) (time.Time, error) {
 		}
 	}
 	return time.Time{}, errors.New("no matching time layout for: " + s)
+}
+
+func PrintStats(parserResponse *dtos.ParserResponse, duration time.Duration) {
+	fmt.Printf("ProcessedLines: %d, ParsedLines: %d, SkippedLines: %d Duration: %v", parserResponse.LinesRead, parserResponse.LinesParsed, parserResponse.LinesSkipped, duration)
 }

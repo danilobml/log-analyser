@@ -17,31 +17,37 @@ type Options struct {
 }
 
 func AnalyseFileLogs(filePath string, options Options) error {
-	logs, err := parser.ParseFile(filePath)
+	startTime := time.Now()
+
+	from, _ := helpers.ParseDateTime(options.From)
+	to, _ := helpers.ParseDateTime(options.To)
+
+	helpers.PrintHeaders(from, to)
+
+	parserResponse, err := parser.ParseFile(filePath)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("options from", options.From)
-	fmt.Println("options to", options.To)
+	logs := parserResponse.Logs
 
 	if options.From != "" || options.To != "" {
-		from, _ := helpers.ParseDateTime(options.From)
-		to, _ := helpers.ParseDateTime(options.To)
 		logs = filterLogsPerPeriod(logs, to, from)
 	}
 
 	statusAnalysis := analyseStatus(logs)
-
 	helpers.PrintStatusAnalysisResults(statusAnalysis, "")
 
 	if options.Paths {
 		pathAnalysis := analysePaths(logs)
-
 		for path, statusAnalysis := range pathAnalysis.Results {
 			helpers.PrintStatusAnalysisResults(statusAnalysis, string(path))
 		}
+		fmt.Println()
 	}
+
+	duration := time.Since(startTime)
+	helpers.PrintStats(parserResponse, duration)
 
 	return nil
 }
@@ -97,16 +103,12 @@ func analysePaths(logs []*models.Log) *dtos.PathAnalysisResponse {
 func filterLogsPerPeriod(logs []*models.Log, to, from time.Time) []*models.Log {
 	filteredLogs := []*models.Log{}
 
-	fmt.Println("from", from)
-
 	var realTo time.Time
 	if to.IsZero() {
 		realTo = time.Now()
 	} else {
 		realTo = to
 	}
-
-	fmt.Println("realTo", realTo)
 
 	for _, log := range logs {
 		if log.DateTime.After(from) && log.DateTime.Before(realTo) {

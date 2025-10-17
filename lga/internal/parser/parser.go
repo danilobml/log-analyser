@@ -5,38 +5,44 @@ import (
 	"os"
 	"regexp"
 
+	"github.com/danilobml/lga/lga/internal/dtos"
 	"github.com/danilobml/lga/lga/internal/helpers"
 	"github.com/danilobml/lga/lga/internal/models"
 )
 
-type Log = models.Log
+func ParseFile(filePath string) (*dtos.ParserResponse, error) {
+	response := dtos.ParserResponse{}
 
-func ParseFile(filePath string) ([]*Log, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	logs := []*Log{}
+	logs := []*models.Log{}
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
+		response.LinesRead++
 		log, err := parseLine(scanner.Text())
 		if err != nil {
-			return nil, err
+			response.LinesSkipped++
+			continue
 		}
+		response.LinesParsed++
 		logs = append(logs, log)
 	}
+
+	response.Logs = logs
 
 	if err := scanner.Err(); err != nil {
 		return nil, err
 	}
 
-	return logs, nil
+	return &response, nil
 }
 
-func parseLine(line string) (*Log, error) {
+func parseLine(line string) (*models.Log, error) {
 	statusRe := regexp.MustCompile(`\|\s+(\d{3})\s+\|`)
 	statusCode := statusRe.FindStringSubmatch(line)[1]
 
@@ -49,7 +55,7 @@ func parseLine(line string) (*Log, error) {
 		return nil, err
 	}
 
-	log := Log{
+	log := models.Log{
 		StatusCode: statusCode,
 		Path:       models.Path(path),
 		DateTime:   dateTime,
