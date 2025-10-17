@@ -71,7 +71,6 @@ func init() {
 	rootCmd.PersistentFlags().Bool("paths", false, "Analysis per path")
 	rootCmd.PersistentFlags().String("from", "", "defines a starting point for the analysis (filters out logs that were generated before it)")
 	rootCmd.PersistentFlags().String("to", "", "defines an end point for the analysis (filters out logs that were generated after it). If you supply a date with no time, that day won't be included.")
-	// TODO: Add flags for from and to
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
