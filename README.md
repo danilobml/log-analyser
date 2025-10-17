@@ -45,11 +45,12 @@ Each flag modifies the analysis scope; the `<logfile>` argument is required and 
 
 Example log formats:
 ```
-Standard:
+standard:
 127.0.0.1 - - [14/Oct/2025:09:12:33 +0000] "GET /api/health HTTP/1.1" 200 123
 
 Gin:
-[GIN] 2025/
+[GIN] 2025/10/13 - 18:58:04 | 401 |      39.774ms | 127.0.0.1 | GET     "/api/v1/profile"
+```
 
 ### Date and Time Handling
 
