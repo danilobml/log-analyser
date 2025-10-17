@@ -27,6 +27,8 @@ func ParseDateTime(s string) (time.Time, error) {
 		"2006-01-02T15:04:05",
 		"2006-01-02T15:04:05Z07:00",
 		"02/01/2006 15:04:05",
+		"02/01/2006",
+		"01/02/2006",
 	}
 
 	for _, layout := range layouts {

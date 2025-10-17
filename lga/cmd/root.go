@@ -32,9 +32,18 @@ and extract useful insights from raw logs with ease.`,
 		if err != nil {
 			fmt.Println(err.Error())
 		}
-		// TODO: Add options from and to
+		fromOption, err := cmd.Flags().GetString("from")
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		toOption, err := cmd.Flags().GetString("to")
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 
 		options.Paths = pathsOption
+		options.From = fromOption
+		options.To = toOption
 
 		err = analyser.AnalyseFileLogs(filePath, options)
 		if err != nil {
@@ -60,6 +69,8 @@ func init() {
 	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.log-analyser.yaml)")
 
 	rootCmd.PersistentFlags().Bool("paths", false, "Analysis per path")
+	rootCmd.PersistentFlags().String("from", "", "defines a starting point for the analysis (filters out logs that were generated before it)")
+	rootCmd.PersistentFlags().String("to", "", "defines an end point for the analysis (filters out logs that were generated after it). If you supply a date with no time, that day won't be included.")
 	// TODO: Add flags for from and to
 
 	// Cobra also supports local flags, which will only run

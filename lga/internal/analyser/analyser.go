@@ -1,6 +1,7 @@
 package analyser
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/danilobml/lga/lga/internal/dtos"
@@ -10,17 +11,24 @@ import (
 )
 
 type Options struct {
-	From  time.Time
-	To    time.Time
+	From  string
+	To    string
 	Paths bool
 }
-
-type Log = models.Log
 
 func AnalyseFileLogs(filePath string, options Options) error {
 	logs, err := parser.ParseFile(filePath)
 	if err != nil {
 		return err
+	}
+
+	fmt.Println("options from", options.From)
+	fmt.Println("options to", options.To)
+
+	if options.From != "" || options.To != "" {
+		from, _ := helpers.ParseDateTime(options.From)
+		to, _ := helpers.ParseDateTime(options.To)
+		logs = filterLogsPerPeriod(logs, to, from)
 	}
 
 	statusAnalysis := analyseStatus(logs)
@@ -35,13 +43,10 @@ func AnalyseFileLogs(filePath string, options Options) error {
 		}
 	}
 
-	// TODO: Filter per from and to, if set in options
-
 	return nil
 }
 
-
-func analyseStatus(logs []*Log) *dtos.StatusAnalysisResponse {
+func analyseStatus(logs []*models.Log) *dtos.StatusAnalysisResponse {
 	response := dtos.StatusAnalysisResponse{}
 	errorsTotal := 0
 	errors400 := 0
@@ -67,13 +72,13 @@ func analyseStatus(logs []*Log) *dtos.StatusAnalysisResponse {
 	return &response
 }
 
-func analysePaths(logs []*Log) *dtos.PathAnalysisResponse {
-	type LogsPerPath map[models.Path][]*Log
+func analysePaths(logs []*models.Log) *dtos.PathAnalysisResponse {
+	type LogsPerPath map[models.Path][]*models.Log
 	logsSorted := LogsPerPath{}
-	
+
 	for _, log := range logs {
 		if logsSorted[log.Path] == nil {
-			logsSorted[log.Path] = []*Log{log}
+			logsSorted[log.Path] = []*models.Log{log}
 		} else {
 			logsSorted[log.Path] = append(logsSorted[log.Path], log)
 		}
@@ -87,4 +92,27 @@ func analysePaths(logs []*Log) *dtos.PathAnalysisResponse {
 	}
 
 	return &response
+}
+
+func filterLogsPerPeriod(logs []*models.Log, to, from time.Time) []*models.Log {
+	filteredLogs := []*models.Log{}
+
+	fmt.Println("from", from)
+
+	var realTo time.Time
+	if to.IsZero() {
+		realTo = time.Now()
+	} else {
+		realTo = to
+	}
+
+	fmt.Println("realTo", realTo)
+
+	for _, log := range logs {
+		if log.DateTime.After(from) && log.DateTime.Before(realTo) {
+			filteredLogs = append(filteredLogs, log)
+		}
+	}
+
+	return filteredLogs
 }
