@@ -45,9 +45,11 @@ Each flag modifies the analysis scope; the `<logfile>` argument is required and 
 
 Example log formats:
 ```
-127.0.0.1 - - [14/Oct/2025:09:12:33 +0000] "GET /api/health HTTP/1.1" 200 123 "-" "curl/8.4.0"
-127.0.0.1 - - [14/Oct/2025:09:13:05 +0000] "GET /api/users HTTP/1.1" 500 0 "-" "curl/8.4.0"
-```
+Standard:
+127.0.0.1 - - [14/Oct/2025:09:12:33 +0000] "GET /api/health HTTP/1.1" 200 123
+
+Gin:
+[GIN] 2025/
 
 ### Date and Time Handling
 
