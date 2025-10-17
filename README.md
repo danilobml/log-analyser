@@ -1,6 +1,7 @@
 # lga — Log Analyser (Cobra CLI)
+**(Part of a series of mini-projects to get deeper knowledge of Go ans its ecosystem)**
 
-A fast and minimal command-line utility to parse and analyse log files. It identifies errors and extracts insights from raw logs. Built with [Cobra](https://github.com/spf13/cobra).
+A minimal command-line utility to parse and analyse log files. It identifies errors and extracts insights from raw logs. Built with [Cobra](https://github.com/spf13/cobra).
 
 ```bash
 git clone https://github.com/danilobml/lga.git
