@@ -1,11 +1,10 @@
 package analyser
 
 import (
-	"bufio"
-	"fmt"
-	"os"
 	"time"
 
+	"github.com/danilobml/lga/lga/internal/dtos"
+	"github.com/danilobml/lga/lga/internal/helpers"
 	"github.com/danilobml/lga/lga/internal/models"
 	"github.com/danilobml/lga/lga/internal/parser"
 )
@@ -16,61 +15,34 @@ type Options struct {
 	Paths bool
 }
 
-type StatusAnalysisResponse struct {
-	TotalLogs   int
-	ErrorsTotal int
-	Errors400   int
-	Errors500   int
-}
-
-type PathAnalysisResponse struct {
-	Results map[string]StatusAnalysisResponse
-}
-
 type Log = models.Log
 
 func AnalyseFileLogs(filePath string, options Options) error {
-	file, err := os.Open(filePath)
+	logs, err := parser.ParseFile(filePath)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
 
-	logs := []*Log{}
+	statusAnalysis := analyseStatus(logs)
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		log, err := parser.ParseLine(scanner.Text())
-		if err != nil {
-			return err
-		}
-		logs = append(logs, log)
-	}
-
-	logAnalysis := analyseStatus(logs)
-
-	// TODO: Extract to a helper:
-	fmt.Printf("Totals: Total logs: %d, Total errors: %d, 4xx Errors: %d, 5xx Errors: %d\n", logAnalysis.TotalLogs, logAnalysis.ErrorsTotal, logAnalysis.Errors400, logAnalysis.Errors500)
+	helpers.PrintStatusAnalysisResults(statusAnalysis, "")
 
 	if options.Paths {
 		pathAnalysis := analysePaths(logs)
 
 		for path, statusAnalysis := range pathAnalysis.Results {
-			fmt.Printf("Path: %s, Total logs: %d, Total errors: %d, 4xx Errors: %d, 5xx Errors: %d \n", path, statusAnalysis.TotalLogs, statusAnalysis.ErrorsTotal, statusAnalysis.Errors400, statusAnalysis.Errors500)
+			helpers.PrintStatusAnalysisResults(statusAnalysis, string(path))
 		}
 	}
 
 	// TODO: Filter per from and to, if set in options
 
-	if err := scanner.Err(); err != nil {
-		return err
-	}
-
 	return nil
 }
 
-func analyseStatus(logs []*Log) *StatusAnalysisResponse {
-	response := StatusAnalysisResponse{}
+
+func analyseStatus(logs []*Log) *dtos.StatusAnalysisResponse {
+	response := dtos.StatusAnalysisResponse{}
 	errorsTotal := 0
 	errors400 := 0
 	errors500 := 0
@@ -95,23 +67,23 @@ func analyseStatus(logs []*Log) *StatusAnalysisResponse {
 	return &response
 }
 
-func analysePaths(logs []*Log) *PathAnalysisResponse {
-	// TODO: Get paths from logs, filter by path
+func analysePaths(logs []*Log) *dtos.PathAnalysisResponse {
+	type LogsPerPath map[models.Path][]*Log
+	logsSorted := LogsPerPath{}
+	
+	for _, log := range logs {
+		if logsSorted[log.Path] == nil {
+			logsSorted[log.Path] = []*Log{log}
+		} else {
+			logsSorted[log.Path] = append(logsSorted[log.Path], log)
+		}
+	}
 
-	response := PathAnalysisResponse{}
-	response.Results = map[string]StatusAnalysisResponse{
-		"test.com": {
-			TotalLogs: 3,
-			ErrorsTotal: 0,
-			Errors400:   2,
-			Errors500:   1,
-		},
-		"test2.com": {
-			TotalLogs: 6,
-			ErrorsTotal: 4,
-			Errors400:   2,
-			Errors500:   0,
-		},
+	response := dtos.PathAnalysisResponse{}
+	response.Results = map[models.Path]*dtos.StatusAnalysisResponse{}
+
+	for path, logs := range logsSorted {
+		response.Results[path] = analyseStatus(logs)
 	}
 
 	return &response
