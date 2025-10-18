@@ -22,6 +22,43 @@ lga [flags] <logfile>
 ```
 If no arguments are provided, `lga` displays help information.
 
+---
+
+### Make Commands
+
+You can simplify your workflow using the included `Makefile`:
+
+```makefile
+build:
+	go build ./lga/...
+
+install:
+	go install ./lga
+
+new: build install
+
+test:
+	go test ./...
+```
+
+**Usage examples:**
+
+```bash
+# Build the binary (compiled under ./lga)
+make build
+
+# Install the CLI to $GOBIN or $GOPATH/bin
+make install
+
+# Rebuild and install in one step
+make new
+
+# Run all tests recursively
+make test
+```
+
+---
+
 ### Examples
 
 ```bash
@@ -30,6 +67,8 @@ lga --paths ./logs/access.log
 lga --from "2025-10-14" --to "2025-10-17" ./logs/app.log
 lga --from "2025-10-14 08:00:00" --to "2025-10-14 18:00:00" ./logs/app.log
 ```
+
+---
 
 ### Flags
 
@@ -43,7 +82,10 @@ lga --from "2025-10-14 08:00:00" --to "2025-10-14 18:00:00" ./logs/app.log
 
 Each flag modifies the analysis scope; the `<logfile>` argument is required and should be a valid path to your log file.
 
-Example log formats:
+---
+
+### Example Log Formats
+
 ```
 standard:
 127.0.0.1 - - [14/Oct/2025:09:12:33 +0000] "GET /api/health HTTP/1.1" 200 123
@@ -52,12 +94,21 @@ Gin:
 [GIN] 2025/10/13 - 18:58:04 | 401 |      39.774ms | 127.0.0.1 | GET     "/api/v1/profile"
 ```
 
+---
+
 ### Date and Time Handling
 
-`--from` and `--to` are optional. When omitted, all entries are considered. When both are provided, only logs within `[from, to)` are analysed. If `--to` is supplied with a date only (no time), that day is excluded. Example:
+`--from` and `--to` are optional.  
+When omitted, all entries are considered.  
+When both are provided, only logs within `[from, to)` are analysed.  
+
+If `--to` is supplied with a date only (no time), that day is excluded. Example:
+
 ```
 --to "2025-10-17" excludes 2025-10-17 itself (i.e., up to 2025-10-16 23:59:59)
 ```
+
+---
 
 ### Development
 
@@ -66,23 +117,27 @@ Gin:
 ├─ cmd/
 │  └─ root.go     # main package
 ├─ internal/
-│  └─ analyser/   # analysis logic
-│  └─ parser/     # parsing logic
-│  └─ models/     # log definition
-│  └─ dtos/       # response structs
+│  ├─ analyser/   # analysis logic
+│  ├─ parser/     # parsing logic
+│  ├─ models/     # log definition
+│  ├─ dtos/       # response structs
 │  └─ helpers/    # helper functions
 ├─ go.mod
 ├─ Makefile       # Make commands
 └─ README.md
 ```
 
-Run:
+---
+
+### Running & Testing
+
+Run directly:
 ```bash
 go run ./cmd/lga --help
 go run ./cmd/lga --paths --from "2025-10-14" ./logs/app.log
 ```
 
-Build:
+Build manually:
 ```bash
 go build -o lga ./cmd/lga
 ```
@@ -92,6 +147,7 @@ Install locally:
 go install ./cmd/lga
 ```
 
-Test:
+Run tests:
 ```bash
 go test ./...
+```
