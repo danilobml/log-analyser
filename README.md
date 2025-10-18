@@ -24,25 +24,7 @@ If no arguments are provided, `lga` displays help information.
 
 ---
 
-**Usage examples:**
-
-```bash
-# Build the binary (compiled under ./lga)
-make build
-
-# Install the CLI to $GOBIN or $GOPATH/bin
-make install
-
-# Rebuild and install in one step
-make new
-
-# Run all tests recursively
-make test
-```
-
----
-
-### Command Examples
+### Usage Examples
 
 ```bash
 lga ./logs/app.log
